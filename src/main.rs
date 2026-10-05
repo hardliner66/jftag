@@ -1,23 +1,10 @@
 use anyhow::{Context, Result, bail};
-use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD};
 use clap::{Parser, Subcommand};
 use std::io::{IsTerminal, Read};
 use std::path::PathBuf;
 use std::{fs, io};
 
-use jftag::{decode, encode};
-
-fn encode_str(input: &str) -> Result<String> {
-    let value: serde_json::Value = serde_json::from_str(input).context("invalid JSON")?;
-    encode(&value)
-}
-
-fn decode_str(input: &str, pretty: bool) -> Result<String> {
-    let bytes = URL_SAFE_NO_PAD
-        .decode(input.trim())
-        .context("invalid encoded text")?;
-    decode(&bytes, pretty)
-}
+use jftag::{decode_str, encode_str};
 
 #[derive(Parser)]
 #[command(version, about = "Compress JSON into encoded text and back")]
@@ -29,11 +16,13 @@ struct Cli {
 #[derive(Subcommand)]
 enum Command {
     /// JSON -> compressed encoded text
+    #[command(aliases=["enc", "e"])]
     Encode {
         /// Input file; omit or use `-` to read from stdin
         file: Option<PathBuf>,
     },
     /// Encoded text -> JSON
+    #[command(aliases=["dec", "d"])]
     Decode {
         #[arg(short, long)]
         pretty: bool,

@@ -3,6 +3,18 @@ use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD};
 use flate2::{Compression, read::DeflateDecoder, write::DeflateEncoder};
 use std::io::{Read, Write};
 
+pub fn encode_str(input: &str) -> Result<String> {
+    let value: serde_json::Value = serde_json::from_str(input).context("invalid JSON")?;
+    encode(&value)
+}
+
+pub fn decode_str(input: &str, pretty: bool) -> Result<String> {
+    let bytes = URL_SAFE_NO_PAD
+        .decode(input.trim())
+        .context("invalid encoded text")?;
+    decode(&bytes, pretty)
+}
+
 pub fn encode(value: &serde_json::Value) -> Result<String> {
     let minified = serde_json::to_vec(value)?;
     let mut enc = DeflateEncoder::new(Vec::new(), Compression::best());
